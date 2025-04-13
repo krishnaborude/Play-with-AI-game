@@ -43,8 +43,27 @@ templates.env.filters["from_json"] = parse_json
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Database configuration
-DATABASE_URL = f"mysql+pymysql://{os.getenv('DB_USER', 'root')}:{os.getenv('DB_PASSWORD', '')}@{os.getenv('DB_HOST', 'localhost')}/{os.getenv('DB_NAME', 'user_db')}"
-engine = create_engine(DATABASE_URL)
+DB_USER = os.getenv('DB_USER', 'root')
+DB_PASSWORD = os.getenv('DB_PASSWORD', '')
+DB_HOST = os.getenv('DB_HOST', 'localhost')
+DB_NAME = os.getenv('DB_NAME', 'user_db')
+
+# Construct DATABASE_URL from environment variables
+DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
+
+try:
+    engine = create_engine(DATABASE_URL)
+    # Test the connection
+    with engine.connect() as connection:
+        connection.execute("SELECT 1")
+    logger.info("Successfully connected to the database")
+except Exception as e:
+    logger.error(f"Failed to connect to the database: {e}")
+    # Create a SQLite database as fallback
+    DATABASE_URL = "sqlite:///./local.db"
+    engine = create_engine(DATABASE_URL)
+    logger.info("Using SQLite as fallback database")
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
