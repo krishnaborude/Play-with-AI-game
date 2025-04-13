@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, Form, HTTPException, Response, status, Dep
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, Column, String, inspect, DateTime, Integer, ForeignKey, Text, UniqueConstraint, Float
 from sqlalchemy.orm import sessionmaker, relationship, declarative_base
 import os
@@ -13,6 +14,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from datetime import datetime
 import json
 from functools import wraps
+import asyncio
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -21,9 +23,27 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv()
 
+# Get environment variables
+DB_USER = os.getenv('DB_USER', 'root')
+DB_PASSWORD = os.getenv('DB_PASSWORD', '')
+DB_HOST = os.getenv('DB_HOST', 'localhost')
+DB_NAME = os.getenv('DB_NAME', 'user_db')
+SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key-here')
+
 # Create FastAPI app with proper event loop handling
 app = FastAPI()
-app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Add session middleware
+app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
 # Mount static directory
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -43,12 +63,6 @@ templates.env.filters["from_json"] = parse_json
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Database configuration
-DB_USER = os.getenv('DB_USER', 'root')
-DB_PASSWORD = os.getenv('DB_PASSWORD', '')
-DB_HOST = os.getenv('DB_HOST', 'localhost')
-DB_NAME = os.getenv('DB_NAME', 'user_db')
-
-# Construct DATABASE_URL from environment variables
 DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
 
 try:
