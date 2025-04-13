@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Game Interface{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root[data-theme="light"] {
+            --primary-color: #2563eb;
+            --secondary-color: #1d4ed8;
+            --background-color: #f3f4f6;
+            --card-background: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --success-color: #10b981;
+            --nav-background: #ffffff;
+            --nav-text: #111827;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        :root[data-theme="dark"] {
+            --primary-color: #3b82f6;
+            --secondary-color: #2563eb;
+            --background-color: #1f2937;
+            --card-background: #374151;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --success-color: #10b981;
+            --nav-background: #111827;
+            --nav-text: #f9fafb;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.25);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: var(--nav-background);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--nav-text);
+            text-decoration: none;
+        }
+
+        .navbar-nav {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--nav-text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--nav-text);
+            cursor: pointer;
+            padding: 0.5rem;
+            font-size: 1.25rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(var(--primary-color-rgb), 0.1);
+            transform: scale(1.1);
+        }
+
+        .theme-toggle:active {
+            transform: scale(0.95);
+        }
+
+        .theme-toggle i {
+            transition: transform 0.5s ease;
+        }
+
+        .theme-toggle.rotate i {
+            transform: rotate(360deg);
+        }
+
+        .user-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .user-menu-btn {
+            background: none;
+            border: none;
+            color: var(--nav-text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            padding: 0.5rem;
+        }
+
+        .user-menu-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: var(--card-background);
+            min-width: 200px;
+            box-shadow: var(--shadow-lg);
+            border-radius: 0.5rem;
+            padding: 0.5rem 0;
+            z-index: 1000;
+        }
+
+        .user-menu.active .user-menu-content {
+            display: block;
+        }
+
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .user-menu-item:hover {
+            background-color: var(--background-color);
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .navbar-nav {
+                gap: 1rem;
+            }
+
+            .navbar-brand {
+                font-size: 1.25rem;
+            }
+
+            main {
+                padding: 1rem;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/dashboard" class="navbar-brand">Game Interface</a>
+        <div class="navbar-nav">
+            <a href="/dashboard" class="nav-link">
+                <i class="fas fa-home"></i>
+                Dashboard
+            </a>
+            <button id="darkModeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+                <i class="fas fa-sun light-icon"></i>
+                <i class="fas fa-moon dark-icon"></i>
+            </button>
+            <div class="user-menu">
+                <button class="user-menu-btn">
+                    <i class="fas fa-user"></i>
+                    <span>{{ user_email }}</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="user-menu-content">
+                    <a href="/profile" class="user-menu-item">
+                        <i class="fas fa-user-circle"></i>
+                        Profile
+                    </a>
+                    <a href="/settings" class="user-menu-item">
+                        <i class="fas fa-cog"></i>
+                        Settings
+                    </a>
+                    <a href="/logout" class="user-menu-item">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        // Dark mode toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const htmlElement = document.documentElement;
+            const lightIcon = darkModeToggle.querySelector('.light-icon');
+            const darkIcon = darkModeToggle.querySelector('.dark-icon');
+
+            // Set initial state
+            if (localStorage.getItem('theme') === 'dark') {
+                htmlElement.setAttribute('data-theme', 'dark');
+                lightIcon.style.display = 'none';
+                darkIcon.style.display = 'block';
+            } else {
+                htmlElement.setAttribute('data-theme', 'light');
+                lightIcon.style.display = 'block';
+                darkIcon.style.display = 'none';
+            }
+
+            darkModeToggle.addEventListener('click', function() {
+                darkModeToggle.classList.add('rotate');
+                
+                if (htmlElement.getAttribute('data-theme') === 'light') {
+                    htmlElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    lightIcon.style.display = 'none';
+                    darkIcon.style.display = 'block';
+                } else {
+                    htmlElement.setAttribute('data-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                    lightIcon.style.display = 'block';
+                    darkIcon.style.display = 'none';
+                }
+                
+                setTimeout(() => {
+                    darkModeToggle.classList.remove('rotate');
+                }, 500);
+            });
+
+            // User menu toggle
+            const userMenu = document.querySelector('.user-menu');
+            const userMenuBtn = document.querySelector('.user-menu-btn');
+
+            userMenuBtn.addEventListener('click', function() {
+                userMenu.classList.toggle('active');
+            });
+
+            // Close user menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!userMenu.contains(event.target)) {
+                    userMenu.classList.remove('active');
+                }
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

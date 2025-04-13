@@ -1,0 +1,519 @@
+{% extends "base.html" %}
+
+{% block title %}Word Guess{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <a href="/memory-game" class="nav-button prev">
+        <i class="fas fa-chevron-left"></i>
+    </a>
+
+    <div class="game-container">
+        <h1>Word Guess</h1>
+        <p class="game-description">Guess the word with AI hints!</p>
+
+        <div class="difficulty-selector">
+            <button class="btn difficulty-btn" data-difficulty="easy">
+                <i class="fas fa-star"></i>
+                Easy
+            </button>
+            <button class="btn difficulty-btn" data-difficulty="medium">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                Medium
+            </button>
+            <button class="btn difficulty-btn" data-difficulty="hard">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                Hard
+            </button>
+        </div>
+
+        <div class="game-status">
+            <div class="question-display" id="questionDisplay">Select difficulty to start!</div>
+            <div class="word-display" id="wordDisplay">_ _ _ _ _</div>
+            <div class="hint-text" id="hintText"></div>
+            <div class="attempts">Attempts left: <span id="attempts">6</span></div>
+        </div>
+
+        <div class="game-input">
+            <input type="text" 
+                   id="guessInput" 
+                   placeholder="Enter your guess" 
+                   maxlength="20"
+                   autocomplete="off"
+                   class="guess-input">
+            <button class="btn submit-btn" id="submitGuess">
+                <i class="fas fa-paper-plane"></i>
+                Submit
+            </button>
+        </div>
+
+        <div class="game-history">
+            <h3>Previous Guesses</h3>
+            <ul id="guessHistory" class="guess-list"></ul>
+        </div>
+
+        <div class="controls">
+            <button id="newGameBtn" class="btn control-btn">
+                <i class="fas fa-redo"></i>
+                New Game
+            </button>
+            <button id="hintBtn" class="btn control-btn">
+                <i class="fas fa-lightbulb"></i>
+                Get Hint
+            </button>
+        </div>
+    </div>
+
+    <a href="/math-challenge" class="nav-button next">
+        <i class="fas fa-chevron-right"></i>
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .game-container {
+        background: var(--card-background);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-lg);
+        width: 100%;
+        max-width: 800px;
+        margin: 2rem auto;
+        text-align: center;
+    }
+
+    .game-description {
+        color: var(--text-secondary);
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+    }
+
+    .difficulty-selector {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin: 2rem 0;
+        flex-wrap: wrap;
+    }
+
+    .difficulty-btn {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .difficulty-btn i {
+        color: #ffd700;
+    }
+
+    .difficulty-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .difficulty-btn.active {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .word-display {
+        font-size: 3rem;
+        font-weight: bold;
+        letter-spacing: 0.5rem;
+        margin: 2rem 0;
+        color: var(--text-primary);
+        font-family: monospace;
+    }
+
+    .hint-text {
+        font-size: 1.2rem;
+        margin: 1rem 0;
+        color: var(--text-secondary);
+        min-height: 2rem;
+    }
+
+    .attempts {
+        font-size: 1.2rem;
+        color: var(--text-primary);
+        margin: 1rem 0;
+    }
+
+    .game-input {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin: 2rem 0;
+        padding: 0 1rem;
+    }
+
+    .guess-input {
+        padding: 1rem 1.5rem;
+        font-size: 1.2rem;
+        border: 2px solid var(--primary-color);
+        border-radius: 0.5rem;
+        background: var(--card-background);
+        color: var(--text-primary);
+        width: 250px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .guess-input:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
+    }
+
+    .submit-btn {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+    }
+
+    .game-history {
+        margin: 2rem auto;
+        text-align: left;
+        max-width: 400px;
+    }
+
+    .game-history h3 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .guess-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .guess-list li {
+        padding: 0.75rem 1rem;
+        margin: 0.5rem 0;
+        border-radius: 0.5rem;
+        background: var(--background-color);
+        color: var(--text-primary);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .guess-list li.correct {
+        background: #10b981;
+        color: white;
+    }
+
+    .guess-list li.partial {
+        background: #f59e0b;
+        color: white;
+    }
+
+    .guess-list li.wrong {
+        background: #ef4444;
+        color: white;
+    }
+
+    .controls {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .control-btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .nav-button {
+        position: fixed;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: var(--card-background);
+        color: var(--text-primary);
+        border: 2px solid var(--primary-color);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        z-index: 1000;
+        opacity: 0.8;
+    }
+
+    .nav-button:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-50%) scale(1.1);
+        opacity: 1;
+    }
+
+    .nav-button.prev { left: 15px; }
+    .nav-button.next { right: 15px; }
+
+    @media (max-width: 768px) {
+        .game-container { 
+            padding: 1rem;
+            margin: 1rem;
+        }
+        .word-display { 
+            font-size: 2rem;
+            letter-spacing: 0.3rem;
+        }
+        .game-input {
+            flex-direction: column;
+            align-items: center;
+        }
+        .guess-input {
+            width: 100%;
+            max-width: 300px;
+        }
+        .submit-btn {
+            width: 100%;
+            max-width: 300px;
+        }
+        .controls {
+            flex-direction: column;
+            align-items: center;
+        }
+        .control-btn {
+            width: 100%;
+            max-width: 300px;
+            justify-content: center;
+        }
+        .nav-button {
+            width: 30px;
+            height: 30px;
+            font-size: 0.9rem;
+        }
+        .nav-button.prev { left: 8px; }
+        .nav-button.next { right: 8px; }
+    }
+
+    .question-display {
+        font-size: 1.4rem;
+        margin: 1.5rem 0;
+        color: var(--text-primary);
+        padding: 1rem;
+        background: var(--background-color);
+        border-radius: 0.5rem;
+        box-shadow: var(--shadow-md);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const questions = {
+        easy: [
+            { question: "What animal says 'meow'?", answer: 'cat' },
+            { question: "What animal is known as man's best friend?", answer: 'dog' },
+            { question: "What gives us light during the day?", answer: 'sun' },
+            { question: "What shines at night and controls the tides?", answer: 'moon' },
+            { question: "What do we read that has many pages?", answer: 'book' }
+        ],
+        medium: [
+            { question: "What programming language is named after a snake?", answer: 'python' },
+            { question: "What beverage is made from roasted beans?", answer: 'coffee' },
+            { question: "What do you call an area where plants and flowers grow?", answer: 'garden' },
+            { question: "What do you look through to see outside your house?", answer: 'window' },
+            { question: "What writing tool uses graphite?", answer: 'pencil' }
+        ],
+        hard: [
+            { question: "What do we call a step-by-step procedure for solving a problem?", answer: 'algorithm' },
+            { question: "What is a large orchestral musical composition?", answer: 'symphony' },
+            { question: "What insect starts as a caterpillar and becomes beautiful?", answer: 'butterfly' },
+            { question: "What do we call an exciting or dangerous journey?", answer: 'adventure' },
+            { question: "What sweet food is made from cocoa beans?", answer: 'chocolate' }
+        ]
+    };
+
+    let currentWord = '';
+    let currentQuestion = '';
+    let guessedLetters = new Set();
+    let remainingAttempts = 6;
+    let gameActive = false;
+    let currentDifficulty = '';
+
+    const questionDisplay = document.getElementById('questionDisplay');
+    const wordDisplay = document.getElementById('wordDisplay');
+    const hintText = document.getElementById('hintText');
+    const attemptsSpan = document.getElementById('attempts');
+    const guessInput = document.getElementById('guessInput');
+    const submitGuess = document.getElementById('submitGuess');
+    const guessHistory = document.getElementById('guessHistory');
+    const newGameBtn = document.getElementById('newGameBtn');
+    const hintBtn = document.getElementById('hintBtn');
+    const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+
+    function initializeGame(difficulty) {
+        currentDifficulty = difficulty;
+        const questionList = questions[difficulty];
+        const questionIndex = Math.floor(Math.random() * questionList.length);
+        currentQuestion = questionList[questionIndex].question;
+        currentWord = questionList[questionIndex].answer.toLowerCase();
+        guessedLetters.clear();
+        remainingAttempts = 6;
+        gameActive = true;
+        
+        // Reset UI
+        questionDisplay.textContent = currentQuestion;
+        updateWordDisplay();
+        attemptsSpan.textContent = remainingAttempts;
+        guessHistory.innerHTML = '';
+        guessInput.value = '';
+        hintText.textContent = 'Game started! Answer the question above.';
+        
+        // Update difficulty buttons
+        difficultyBtns.forEach(btn => {
+            btn.classList.remove('active');
+            if(btn.dataset.difficulty === difficulty) {
+                btn.classList.add('active');
+            }
+        });
+
+        guessInput.focus();
+    }
+
+    function updateWordDisplay() {
+        wordDisplay.textContent = currentWord
+            .split('')
+            .map(letter => guessedLetters.has(letter) ? letter : '_')
+            .join(' ');
+    }
+
+    function checkWin() {
+        return currentWord.split('').every(letter => guessedLetters.has(letter));
+    }
+
+    function addGuessToHistory(guess, isCorrect, feedback = '') {
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <span>${guess}</span>
+            <span>${feedback}</span>
+        `;
+        li.classList.add(isCorrect ? 'correct' : 'wrong');
+        guessHistory.insertBefore(li, guessHistory.firstChild);
+    }
+
+    function getHint() {
+        if (!gameActive) {
+            hintText.textContent = 'Please start a new game first!';
+            return;
+        }
+        
+        const unguessedLetters = currentWord
+            .split('')
+            .filter(letter => !guessedLetters.has(letter));
+            
+        if (unguessedLetters.length === 0) {
+            hintText.textContent = 'No more hints available!';
+            return;
+        }
+
+        const hintLetter = unguessedLetters[Math.floor(Math.random() * unguessedLetters.length)];
+        hintText.textContent = `Hint: The answer contains the letter "${hintLetter}"`;
+        remainingAttempts--;
+        attemptsSpan.textContent = remainingAttempts;
+
+        if (remainingAttempts <= 0) {
+            gameActive = false;
+            hintText.textContent = `Game Over! The answer was: ${currentWord}`;
+        }
+    }
+
+    function handleGuess() {
+        if (!gameActive) {
+            hintText.textContent = 'Please start a new game first!';
+            return;
+        }
+
+        const guess = guessInput.value.toLowerCase().trim();
+        guessInput.value = '';
+
+        if (!guess) {
+            hintText.textContent = 'Please enter your answer!';
+            return;
+        }
+
+        if (guess.length === 1) {
+            // Letter guess
+            if (guessedLetters.has(guess)) {
+                hintText.textContent = 'You already tried that letter!';
+                return;
+            }
+
+            guessedLetters.add(guess);
+            const isCorrect = currentWord.includes(guess);
+            const feedback = isCorrect ? 'Letter found!' : 'Letter not in answer';
+            addGuessToHistory(guess, isCorrect, feedback);
+
+            if (!isCorrect) {
+                remainingAttempts--;
+                attemptsSpan.textContent = remainingAttempts;
+            }
+        } else {
+            // Word guess
+            const isCorrect = guess === currentWord;
+            const feedback = isCorrect ? 'Correct answer!' : 'Wrong answer';
+            addGuessToHistory(guess, isCorrect, feedback);
+
+            if (isCorrect) {
+                guessedLetters = new Set(currentWord.split(''));
+            } else {
+                remainingAttempts--;
+                attemptsSpan.textContent = remainingAttempts;
+            }
+        }
+
+        updateWordDisplay();
+
+        if (checkWin()) {
+            gameActive = false;
+            hintText.textContent = 'Congratulations! You got the correct answer! 🎉';
+            // Save game result here
+        } else if (remainingAttempts <= 0) {
+            gameActive = false;
+            hintText.textContent = `Game Over! The correct answer was: ${currentWord}`;
+            // Save game result here
+        }
+    }
+
+    // Event Listeners
+    difficultyBtns.forEach(btn => {
+        btn.addEventListener('click', () => initializeGame(btn.dataset.difficulty));
+    });
+
+    submitGuess.addEventListener('click', handleGuess);
+    guessInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleGuess();
+    });
+
+    newGameBtn.addEventListener('click', () => {
+        if (currentDifficulty) {
+            initializeGame(currentDifficulty);
+        } else {
+            hintText.textContent = 'Please select a difficulty first!';
+        }
+    });
+
+    hintBtn.addEventListener('click', getHint);
+});
+</script>
+{% endblock %} 

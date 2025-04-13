@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <h1>Welcome to Game Interface</h1>
+    
+    <!-- Game Cards Section -->
+    <div class="game-cards">
+        <!-- Tic Tac Toe Game Card -->
+        <section class="card game-preview-card">
+            <div class="game-preview-content">
+                <div class="game-preview-icon">
+                    <i class="fas fa-gamepad"></i>
+                </div>
+                <div class="game-preview-info">
+                    <h3>Tic Tac Toe</h3>
+                    <p>Challenge yourself against AI in this classic game!</p>
+                    <a href="/game" class="play-game-btn">
+                        <i class="fas fa-play"></i>
+                        Play Game
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Click the Circle Game Card -->
+        <section class="card game-preview-card">
+            <div class="game-preview-content">
+                <div class="game-preview-icon">
+                    <i class="fas fa-circle"></i>
+                </div>
+                <div class="game-preview-info">
+                    <h3>Click the Circle</h3>
+                    <p>Test your reflexes!</p>
+                    <a href="/circle-game" class="play-game-btn">
+                        <i class="fas fa-play"></i>
+                        Play Now
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Memory Card Game -->
+        <section class="card game-preview-card">
+            <div class="game-preview-content">
+                <div class="game-preview-icon">
+                    <i class="fas fa-memory"></i>
+                </div>
+                <div class="game-preview-info">
+                    <h3>Memory Card Game</h3>
+                    <p>Test your memory with this fun card matching game!</p>
+                    <a href="/memory-game" class="play-game-btn">
+                        <i class="fas fa-play"></i>
+                        Play Game
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Word Guess Game Card -->
+        <section class="card game-preview-card">
+            <div class="game-preview-content">
+                <div class="game-preview-icon">
+                    <i class="fas fa-font"></i>
+                </div>
+                <div class="game-preview-info">
+                    <h3>Word Guess</h3>
+                    <p>Guess the word with AI hints! Multiple difficulty levels.</p>
+                    <a href="/word-guess" class="play-game-btn">
+                        <i class="fas fa-play"></i>
+                        Play Game
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Math Challenge Card -->
+        <section class="card game-preview-card">
+            <div class="game-preview-content">
+                <div class="game-preview-icon">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <div class="game-preview-info">
+                    <h3>Math Challenge</h3>
+                    <p>Test your math skills with timed challenges!</p>
+                    <a href="/math-challenge" class="play-game-btn">
+                        <i class="fas fa-play"></i>
+                        Play Game
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rock Paper Scissors Card -->
+        <section class="card game-preview-card">
+            <div class="game-preview-content">
+                <div class="game-preview-icon">
+                    <i class="fas fa-hand-rock"></i>
+                </div>
+                <div class="game-preview-info">
+                    <h3>Rock Paper Scissors</h3>
+                    <p>Challenge the AI in this classic game!</p>
+                    <a href="/rps-game" class="play-game-btn">
+                        <i class="fas fa-play"></i>
+                        Play Game
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+            .main-content {
+        padding: 2rem;
+        max-width: 1200px;
+                margin: 0 auto;
+            }
+            
+    h1 {
+                font-size: 2rem;
+        margin-bottom: 2rem;
+            color: var(--text-primary);
+        }
+
+    .game-cards {
+            display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+        }
+
+        .game-preview-card {
+            background: var(--card-background);
+            border-radius: 1rem;
+        padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .game-preview-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .game-preview-content {
+            display: flex;
+            align-items: center;
+        gap: 1.5rem;
+        }
+
+        .game-preview-icon {
+        width: 4rem;
+        height: 4rem;
+        background: var(--primary-color);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        font-size: 2rem;
+            color: white;
+        }
+
+        .game-preview-info {
+            flex: 1;
+        }
+
+        .game-preview-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .game-preview-info p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .play-game-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            text-decoration: none;
+        cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .play-game-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        @media (max-width: 768px) {
+            .game-preview-content {
+                flex-direction: column;
+                text-align: center;
+            align-items: center;
+            gap: 1.25rem;
+            }
+
+            .game-preview-icon {
+                margin: 0 auto;
+            }
+
+        .play-game-btn {
+            width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+{% endblock %} 

@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Circle Game{% endblock %}
+
+{% block extra_css %}
+<style>
+    .game-container {
+        background: var(--card-background);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-lg);
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .game-area {
+        position: relative;
+        width: 100%;
+        height: 400px;
+        background: var(--background-color);
+        border-radius: 0.5rem;
+        margin: 2rem 0;
+        overflow: hidden;
+    }
+
+    .circle {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .circle:hover {
+        transform: scale(1.1);
+    }
+
+    .score {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+    }
+
+    .timer {
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 0.75rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: white;
+        background: linear-gradient(135deg, #4f46e5, #2563eb);
+        border: none;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2),
+                    0 1px 3px rgba(37, 99, 235, 0.1),
+                    inset 0 1px rgba(255, 255, 255, 0.1);
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #4338ca, #1d4ed8);
+        box-shadow: 0 6px 8px rgba(37, 99, 235, 0.3),
+                    0 2px 4px rgba(37, 99, 235, 0.2),
+                    inset 0 1px rgba(255, 255, 255, 0.2);
+    }
+
+    .btn:active {
+        transform: translateY(0);
+        background: linear-gradient(135deg, #3730a3, #1e40af);
+        box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2),
+                    0 1px 2px rgba(37, 99, 235, 0.1),
+                    inset 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .btn i {
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+    }
+
+    .btn:hover i {
+        transform: scale(1.1);
+    }
+
+    /* Dark mode specific styles */
+    :root[data-theme="dark"] .btn {
+        background: linear-gradient(135deg, #6366f1, #3b82f6);
+        box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3),
+                    0 1px 3px rgba(59, 130, 246, 0.2),
+                    inset 0 1px rgba(255, 255, 255, 0.1);
+    }
+
+    :root[data-theme="dark"] .btn:hover {
+        background: linear-gradient(135deg, #4f46e5, #2563eb);
+        box-shadow: 0 6px 8px rgba(59, 130, 246, 0.4),
+                    0 2px 4px rgba(59, 130, 246, 0.3),
+                    inset 0 1px rgba(255, 255, 255, 0.2);
+    }
+
+    :root[data-theme="dark"] .btn:active {
+        background: linear-gradient(135deg, #4338ca, #1d4ed8);
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3),
+                    0 1px 2px rgba(59, 130, 246, 0.2),
+                    inset 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    /* Button state styles */
+    .btn[data-state="playing"] {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    .btn[data-state="playing"]:hover {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+    }
+
+    .btn[data-state="playing"]:active {
+        background: linear-gradient(135deg, #b91c1c, #991b1b);
+    }
+
+    @media (max-width: 768px) {
+        .game-area {
+            height: 300px;
+        }
+
+        .circle {
+            width: 40px;
+            height: 40px;
+        }
+
+        .btn {
+            padding: 0.625rem 1.5rem;
+            font-size: 1rem;
+        }
+    }
+
+    .nav-button {
+        position: fixed;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: var(--card-background);
+        color: var(--text-primary);
+        border: 2px solid var(--primary-color);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        z-index: 1000;
+        opacity: 0.8;
+    }
+
+    .nav-button:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-50%) scale(1.1);
+        opacity: 1;
+    }
+
+    .nav-button.prev { left: 15px; }
+    .nav-button.next { right: 15px; }
+
+    @media (max-width: 768px) {
+        .nav-button {
+            width: 30px;
+            height: 30px;
+            font-size: 0.9rem;
+        }
+        .nav-button.prev { left: 8px; }
+        .nav-button.next { right: 8px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <a href="/game" class="nav-button prev">
+        <i class="fas fa-chevron-left"></i>
+    </a>
+
+    <div class="game-container">
+        <h1>Click the Circle</h1>
+        <p>Test your reflexes! Click the circles as quickly as you can. You have 30 seconds!</p>
+
+        <div class="score">Score: <span id="score">0</span></div>
+        <div class="timer">Time Left: <span id="timer">30</span>s</div>
+
+        <div class="game-area" id="gameArea">
+            <div class="circle" id="target"></div>
+        </div>
+
+        <button id="startGame" class="btn" data-state="initial">
+            <i class="fas fa-play"></i>
+            Start Game
+        </button>
+    </div>
+
+    <a href="/memory-game" class="nav-button next">
+        <i class="fas fa-chevron-right"></i>
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const gameArea = document.getElementById('gameArea');
+        const target = document.getElementById('target');
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer');
+        const startButton = document.getElementById('startGame');
+
+        let score = 0;
+        let timeLeft = 30;
+        let gameInterval;
+        let timerInterval;
+        let isPlaying = false;
+
+        function updateTargetPosition() {
+            const maxX = gameArea.clientWidth - target.clientWidth;
+            const maxY = gameArea.clientHeight - target.clientHeight;
+            
+            target.style.left = Math.random() * maxX + 'px';
+            target.style.top = Math.random() * maxY + 'px';
+        }
+
+        function updateTimer() {
+            timeLeft--;
+            timerDisplay.textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }
+
+        function startGame() {
+            score = 0;
+            timeLeft = 30;
+            scoreDisplay.textContent = score;
+            timerDisplay.textContent = timeLeft;
+            isPlaying = true;
+            target.style.display = 'block';
+            updateTargetPosition();
+            startButton.innerHTML = '<i class="fas fa-stop"></i> Stop Game';
+            startButton.setAttribute('data-state', 'playing');
+            
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function endGame() {
+            isPlaying = false;
+            target.style.display = 'none';
+            clearInterval(timerInterval);
+            startButton.innerHTML = '<i class="fas fa-play"></i> Start Game';
+            startButton.setAttribute('data-state', 'initial');
+            
+            // Save game result
+            const formData = new FormData();
+            formData.append('game_type', 'circle_game');
+            formData.append('result', score >= 15 ? 'win' : 'loss'); // Win if score is 15 or higher
+            formData.append('moves', score.toString());
+            formData.append('time_taken', '30');
+            
+            fetch('/save-game-result', {
+                method: 'POST',
+                body: formData
+            }).then(() => {
+                // Show game over message with score
+                alert(`Game Over! Your final score: ${score}`);
+            });
+        }
+
+        target.addEventListener('click', function() {
+            if (isPlaying) {
+                score++;
+                scoreDisplay.textContent = score;
+                updateTargetPosition();
+            }
+        });
+
+        startButton.addEventListener('click', function() {
+            if (isPlaying) {
+                endGame();
+            } else {
+                startGame();
+            }
+        });
+
+        // Hide target initially
+        target.style.display = 'none';
+    });
+</script>
+{% endblock %} 

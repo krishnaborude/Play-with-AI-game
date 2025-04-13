@@ -1,0 +1,550 @@
+{% extends "base.html" %}
+
+{% block title %}Math Challenge{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <a href="/word-guess" class="nav-button prev">
+        <i class="fas fa-chevron-left"></i>
+    </a>
+
+    <div class="game-container">
+        <h1 class="game-title">Math Challenge</h1>
+        <p class="game-description">Test your math skills with timed challenges!</p>
+
+        <div class="difficulty-selector">
+            <button class="difficulty-btn active" data-difficulty="easy">
+                <i class="fas fa-star"></i>
+                Easy
+            </button>
+            <button class="difficulty-btn" data-difficulty="medium">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                Medium
+            </button>
+            <button class="difficulty-btn" data-difficulty="hard">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                Hard
+            </button>
+        </div>
+
+        <div class="game-status">
+            <div class="status-card timer">
+                <i class="fas fa-clock"></i>
+                <span>Time: <span id="time">60</span>s</span>
+            </div>
+            <div class="status-card score">
+                <i class="fas fa-trophy"></i>
+                <span>Score: <span id="score">0</span></span>
+            </div>
+        </div>
+
+        <div class="problem-container">
+            <div class="problem" id="problem">
+                Click Start to begin!
+            </div>
+            <div class="game-input">
+                <input type="number" id="answer-input" placeholder="Enter your answer">
+                <button class="submit-btn" id="submit-answer">
+                    <i class="fas fa-check"></i>
+                    Submit
+                </button>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="startBtn" class="start-btn">
+                <i class="fas fa-play"></i>
+                Start Game
+            </button>
+        </div>
+
+        <div class="history">
+            <h3 class="history-title">Recent Problems</h3>
+            <ul id="problem-history"></ul>
+        </div>
+    </div>
+
+    <a href="/rps-game" class="nav-button next">
+        <i class="fas fa-chevron-right"></i>
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .game-container {
+        background: var(--card-background);
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        width: 100%;
+        max-width: 800px;
+        margin: 2rem auto;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .game-title {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+
+    .game-description {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .difficulty-selector {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin: 2rem 0;
+    }
+
+    .difficulty-btn {
+        padding: 0.75rem 1.5rem;
+        border: 2px solid var(--primary-color);
+        border-radius: 1rem;
+        background: transparent;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .difficulty-btn:hover,
+    .difficulty-btn.active {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .difficulty-btn i {
+        font-size: 0.9rem;
+    }
+
+    .game-status {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+
+    .status-card {
+        background: var(--background-color);
+        padding: 1rem 2rem;
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.2rem;
+        color: var(--text-primary);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .status-card i {
+        color: var(--primary-color);
+    }
+
+    .problem-container {
+        margin: 2rem 0;
+        padding: 2.5rem;
+        background: var(--background-color);
+        border-radius: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .problem {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 2rem;
+        color: var(--text-primary);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .game-input {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin: 1rem 0;
+    }
+
+    #answer-input {
+        padding: 1rem 1.5rem;
+        font-size: 1.2rem;
+        border: 2px solid var(--primary-color);
+        border-radius: 1rem;
+        background: var(--card-background);
+        color: var(--text-primary);
+        width: 180px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    #answer-input:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.3);
+    }
+
+    .submit-btn {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+    }
+
+    .start-btn {
+        padding: 1rem 2.5rem;
+        font-size: 1.2rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 1rem 0;
+    }
+
+    .start-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+    }
+
+    .history {
+        margin: 2rem auto;
+        max-width: 500px;
+        text-align: left;
+    }
+
+    .history-title {
+        color: var(--text-primary);
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    #problem-history {
+        list-style: none;
+        padding: 0;
+    }
+
+    #problem-history li {
+        padding: 0.75rem 1.5rem;
+        margin: 0.75rem 0;
+        border-radius: 1rem;
+        background: var(--background-color);
+        color: var(--text-primary);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    #problem-history li:hover {
+        transform: translateX(4px);
+    }
+
+    .nav-button {
+        position: fixed;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--card-background);
+        color: var(--text-primary);
+        border: 2px solid var(--primary-color);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        z-index: 1000;
+        opacity: 0.8;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-button:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-50%) scale(1.1);
+        opacity: 1;
+    }
+
+    .nav-button.prev { left: 20px; }
+    .nav-button.next { right: 20px; }
+
+    @media (max-width: 768px) {
+        .game-container {
+            padding: 1.5rem;
+            margin: 1rem;
+            border-radius: 1rem;
+        }
+
+        .game-title {
+            font-size: 2rem;
+        }
+
+        .problem {
+            font-size: 2.2rem;
+        }
+
+        .game-status {
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .status-card {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .game-input {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #answer-input {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            max-width: 300px;
+            justify-content: center;
+        }
+
+        .difficulty-selector {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .difficulty-btn {
+            width: 100%;
+            max-width: 300px;
+            justify-content: center;
+        }
+
+        .nav-button {
+            width: 35px;
+            height: 35px;
+            font-size: 1rem;
+        }
+
+        .nav-button.prev { left: 10px; }
+        .nav-button.next { right: 10px; }
+    }
+
+    /* Dark mode enhancements */
+    @media (prefers-color-scheme: dark) {
+        .game-container {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        .status-card,
+        .problem-container,
+        #problem-history li {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const problemEl = document.getElementById('problem');
+        const answerInput = document.getElementById('answer-input');
+        const submitBtn = document.getElementById('submit-answer');
+        const startBtn = document.getElementById('startBtn');
+        const timeEl = document.getElementById('time');
+        const scoreEl = document.getElementById('score');
+        const historyList = document.getElementById('problem-history');
+        const difficultyBtns = document.querySelectorAll('.difficulty-selector button');
+
+        let currentProblem = null;
+        let timer = null;
+        let timeLeft = 60;
+        let score = 0;
+        let isGameActive = false;
+        let difficulty = 'easy';
+
+        // Difficulty settings
+        const difficulties = {
+            easy: { max: 10, operations: ['+', '-'] },
+            medium: { max: 25, operations: ['+', '-', '*'] },
+            hard: { max: 50, operations: ['+', '-', '*', '/'] }
+        };
+
+        // Generate a random math problem based on difficulty
+        function generateProblem() {
+            const settings = difficulties[difficulty];
+            const operation = settings.operations[Math.floor(Math.random() * settings.operations.length)];
+            let num1 = Math.floor(Math.random() * settings.max) + 1;
+            let num2 = Math.floor(Math.random() * settings.max) + 1;
+
+            // Ensure division problems result in whole numbers
+            if (operation === '/') {
+                num2 = Math.floor(Math.random() * 10) + 1;
+                num1 = num2 * (Math.floor(Math.random() * 10) + 1);
+            }
+
+            let answer;
+            switch(operation) {
+                case '+': answer = num1 + num2; break;
+                case '-': answer = num1 - num2; break;
+                case '*': answer = num1 * num2; break;
+                case '/': answer = num1 / num2; break;
+            }
+
+            return {
+                question: `${num1} ${operation} ${num2}`,
+                answer: answer
+            };
+        }
+
+        // Update the timer display
+        function updateTimer() {
+            timeEl.textContent = timeLeft;
+            if (timeLeft <= 0) {
+                endGame();
+            } else {
+                timeLeft--;
+            }
+        }
+
+        // Start a new game
+        function startGame() {
+            isGameActive = true;
+            timeLeft = 60;
+            score = 0;
+            historyList.innerHTML = '';
+            scoreEl.textContent = '0';
+            startBtn.style.display = 'none';
+            answerInput.value = '';
+            answerInput.disabled = false;
+            submitBtn.disabled = false;
+
+            // Start timer
+            if (timer) clearInterval(timer);
+            timer = setInterval(updateTimer, 1000);
+
+            // Generate first problem
+            nextProblem();
+        }
+
+        // End the game
+        function endGame() {
+            isGameActive = false;
+            clearInterval(timer);
+            problemEl.textContent = `Game Over! Final Score: ${score}`;
+            startBtn.style.display = 'block';
+            startBtn.textContent = 'Play Again';
+            answerInput.disabled = true;
+            submitBtn.disabled = true;
+
+            // Save game result
+            fetch('/save-game-result', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    game_type: 'math_challenge',
+                    score: score,
+                    time_taken: 60,
+                    result: score >= 10 ? 'win' : 'loss'
+                })
+            });
+        }
+
+        // Generate and display next problem
+        function nextProblem() {
+            currentProblem = generateProblem();
+            problemEl.textContent = currentProblem.question;
+            answerInput.value = '';
+            answerInput.focus();
+        }
+
+        // Add problem to history
+        function addToHistory(problem, userAnswer, correct) {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span>${problem} = ${userAnswer}</span>
+                <span style="color: ${correct ? 'var(--success-color)' : 'var(--error-color)'}">
+                    ${correct ? '✓' : '✗'}
+                </span>
+            `;
+            historyList.insertBefore(li, historyList.firstChild);
+            if (historyList.children.length > 5) {
+                historyList.removeChild(historyList.lastChild);
+            }
+        }
+
+        // Event Listeners
+        startBtn.addEventListener('click', startGame);
+
+        submitBtn.addEventListener('click', () => {
+            if (!isGameActive) return;
+
+            const userAnswer = parseFloat(answerInput.value);
+            if (isNaN(userAnswer)) return;
+
+            const correct = Math.abs(userAnswer - currentProblem.answer) < 0.01;
+            if (correct) score += difficulty === 'easy' ? 1 : (difficulty === 'medium' ? 2 : 3);
+            scoreEl.textContent = score;
+
+            addToHistory(currentProblem.question, userAnswer, correct);
+            nextProblem();
+        });
+
+        answerInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                submitBtn.click();
+            }
+        });
+
+        difficultyBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (isGameActive) return;
+                difficulty = btn.dataset.difficulty;
+                difficultyBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Initial setup
+        answerInput.disabled = true;
+        submitBtn.disabled = true;
+    });
+</script>
+{% endblock %} 

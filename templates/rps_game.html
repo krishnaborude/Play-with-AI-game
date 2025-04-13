@@ -1,0 +1,531 @@
+{% extends "base.html" %}
+
+{% block title %}Rock Paper Scissors{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <a href="/math-challenge" class="nav-button prev">
+        <i class="fas fa-chevron-left"></i>
+    </a>
+
+    <div class="game-container">
+        <h1 class="game-title">Rock Paper Scissors</h1>
+        <p class="game-description">Challenge the AI in this classic game!</p>
+
+        <div class="game-status">
+            <div class="score-board">
+                <div class="score player">
+                    <div class="score-label">You</div>
+                    <div class="score-value" id="player-score">0</div>
+                </div>
+                <div class="score-divider">
+                    <span>VS</span>
+                </div>
+                <div class="score ai">
+                    <div class="score-label">AI</div>
+                    <div class="score-value" id="ai-score">0</div>
+                </div>
+            </div>
+            <div id="result" class="result">Choose your move!</div>
+        </div>
+
+        <div class="game-area">
+            <div class="choices">
+                <button class="choice-btn" data-choice="rock">
+                    <div class="choice-icon">
+                        <i class="fas fa-hand-rock"></i>
+                    </div>
+                    <span>Rock</span>
+                </button>
+                <button class="choice-btn" data-choice="paper">
+                    <div class="choice-icon">
+                        <i class="fas fa-hand-paper"></i>
+                    </div>
+                    <span>Paper</span>
+                </button>
+                <button class="choice-btn" data-choice="scissors">
+                    <div class="choice-icon">
+                        <i class="fas fa-hand-scissors"></i>
+                    </div>
+                    <span>Scissors</span>
+                </button>
+            </div>
+
+            <div class="game-display">
+                <div class="player-choice">
+                    <h3>Your Choice</h3>
+                    <div id="player-choice-display" class="choice-display">?</div>
+                </div>
+                <div class="vs-display">VS</div>
+                <div class="ai-choice">
+                    <h3>AI Choice</h3>
+                    <div id="ai-choice-display" class="choice-display">?</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="resetBtn" class="reset-btn">
+                <i class="fas fa-redo"></i>
+                Reset Score
+            </button>
+        </div>
+
+        <div class="history">
+            <h3 class="history-title">Match History</h3>
+            <ul id="match-history"></ul>
+        </div>
+    </div>
+
+    <a href="/game" class="nav-button next">
+        <i class="fas fa-chevron-right"></i>
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .game-container {
+        background: var(--card-background);
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        width: 100%;
+        max-width: 800px;
+        margin: 2rem auto;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .game-title {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+
+    .game-description {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .score-board {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 2rem;
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background: var(--background-color);
+        border-radius: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .score {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 2rem;
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .score.player {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-light) 100%);
+    }
+
+    .score.ai {
+        background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-color-light) 100%);
+    }
+
+    .score-label {
+        font-size: 1.2rem;
+        color: white;
+        font-weight: 600;
+    }
+
+    .score-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: white;
+    }
+
+    .score-divider {
+        font-size: 1.5rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+    }
+
+    .result {
+        font-size: 1.5rem;
+        margin: 1.5rem 0;
+        color: var(--text-primary);
+        font-weight: 600;
+        padding: 1rem;
+        border-radius: 1rem;
+        background: var(--background-color);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .choices {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+
+    .choice-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem;
+        border: none;
+        border-radius: 1.5rem;
+        background: var(--background-color);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .choice-btn:hover {
+        transform: translateY(-5px) scale(1.05);
+        background: var(--primary-color);
+        color: white;
+        box-shadow: 0 8px 24px rgba(var(--primary-color-rgb), 0.3);
+    }
+
+    .choice-icon {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--card-background);
+        border-radius: 50%;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .choice-btn:hover .choice-icon {
+        background: white;
+        color: var(--primary-color);
+    }
+
+    .choice-btn i {
+        font-size: 2.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .game-display {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 3rem;
+        margin: 3rem 0;
+        padding: 2rem;
+        background: var(--background-color);
+        border-radius: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .player-choice, .ai-choice {
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        background: var(--card-background);
+        transition: all 0.3s ease;
+    }
+
+    .player-choice h3, .ai-choice h3 {
+        color: var(--text-primary);
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .choice-display {
+        font-size: 3.5rem;
+        margin: 1rem 0;
+        color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .vs-display {
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .reset-btn {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .reset-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+    }
+
+    .history {
+        margin: 2rem auto;
+        max-width: 500px;
+        text-align: left;
+    }
+
+    .history-title {
+        color: var(--text-primary);
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    #match-history {
+        list-style: none;
+        padding: 0;
+    }
+
+    #match-history li {
+        padding: 1rem 1.5rem;
+        margin: 0.75rem 0;
+        border-radius: 1rem;
+        background: var(--background-color);
+        color: var(--text-primary);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    #match-history li:hover {
+        transform: translateX(4px);
+    }
+
+    @media (max-width: 768px) {
+        .game-container {
+            padding: 1.5rem;
+            margin: 1rem;
+            border-radius: 1rem;
+        }
+
+        .game-title {
+            font-size: 2rem;
+        }
+
+        .score-board {
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .score {
+            width: 100%;
+        }
+
+        .score-divider {
+            display: none;
+        }
+
+        .choices {
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .choice-btn {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .game-display {
+            flex-direction: column;
+            gap: 1.5rem;
+            padding: 1rem;
+        }
+
+        .vs-display {
+            font-size: 1.5rem;
+        }
+
+        .choice-display {
+            font-size: 3rem;
+        }
+    }
+
+    /* Dark mode enhancements */
+    @media (prefers-color-scheme: dark) {
+        .game-container {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        .score-board,
+        .game-display,
+        .choice-btn,
+        #match-history li {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const choices = document.querySelectorAll('.choice-btn');
+        const playerScore = document.getElementById('player-score');
+        const aiScore = document.getElementById('ai-score');
+        const result = document.getElementById('result');
+        const playerDisplay = document.getElementById('player-choice-display');
+        const aiDisplay = document.getElementById('ai-choice-display');
+        const resetBtn = document.getElementById('resetBtn');
+        const historyList = document.getElementById('match-history');
+
+        let scores = {
+            player: 0,
+            ai: 0
+        };
+
+        const icons = {
+            rock: '<i class="fas fa-hand-rock"></i>',
+            paper: '<i class="fas fa-hand-paper"></i>',
+            scissors: '<i class="fas fa-hand-scissors"></i>'
+        };
+
+        const resultMessages = {
+            win: 'You win! 🎉',
+            lose: 'AI wins! 🤖',
+            draw: "It's a draw! 🤝"
+        };
+
+        function getAIChoice() {
+            const choices = ['rock', 'paper', 'scissors'];
+            return choices[Math.floor(Math.random() * choices.length)];
+        }
+
+        function determineWinner(playerChoice, aiChoice) {
+            if (playerChoice === aiChoice) return 'draw';
+            
+            const wins = {
+                rock: 'scissors',
+                paper: 'rock',
+                scissors: 'paper'
+            };
+
+            return wins[playerChoice] === aiChoice ? 'win' : 'lose';
+        }
+
+        function updateScore(outcome) {
+            if (outcome === 'win') scores.player++;
+            else if (outcome === 'lose') scores.ai++;
+
+            playerScore.textContent = scores.player;
+            aiScore.textContent = scores.ai;
+        }
+
+        function addToHistory(playerChoice, aiChoice, outcome) {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span>
+                    ${icons[playerChoice]} vs ${icons[aiChoice]}
+                </span>
+                <span style="color: ${
+                    outcome === 'win' ? 'var(--success-color)' : 
+                    outcome === 'lose' ? 'var(--error-color)' : 
+                    'var(--text-secondary)'
+                }">
+                    ${resultMessages[outcome]}
+                </span>
+            `;
+            historyList.insertBefore(li, historyList.firstChild);
+            if (historyList.children.length > 5) {
+                historyList.removeChild(historyList.lastChild);
+            }
+        }
+
+        function animateChoice(element, choice) {
+            element.style.transform = 'scale(0)';
+            setTimeout(() => {
+                element.innerHTML = icons[choice];
+                element.style.transform = 'scale(1)';
+            }, 150);
+        }
+
+        function handleChoice(playerChoice) {
+            const aiChoice = getAIChoice();
+            const outcome = determineWinner(playerChoice, aiChoice);
+
+            // Animate choices
+            animateChoice(playerDisplay, playerChoice);
+            animateChoice(aiDisplay, aiChoice);
+
+            // Update UI
+            result.textContent = resultMessages[outcome];
+            result.style.color = 
+                outcome === 'win' ? 'var(--success-color)' : 
+                outcome === 'lose' ? 'var(--error-color)' : 
+                'var(--text-secondary)';
+
+            updateScore(outcome);
+            addToHistory(playerChoice, aiChoice, outcome);
+
+            // Save game result
+            fetch('/save-game-result', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    game_type: 'rps',
+                    score: outcome === 'win' ? 1 : 0,
+                    result: outcome
+                })
+            });
+        }
+
+        choices.forEach(choice => {
+            choice.addEventListener('click', () => {
+                const playerChoice = choice.dataset.choice;
+                handleChoice(playerChoice);
+
+                // Animate button
+                choice.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    choice.style.transform = '';
+                }, 150);
+            });
+        });
+
+        resetBtn.addEventListener('click', () => {
+            scores.player = 0;
+            scores.ai = 0;
+            playerScore.textContent = '0';
+            aiScore.textContent = '0';
+            result.textContent = 'Choose your move!';
+            result.style.color = 'var(--text-primary)';
+            playerDisplay.innerHTML = '?';
+            aiDisplay.innerHTML = '?';
+            historyList.innerHTML = '';
+
+            // Animate reset button
+            resetBtn.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                resetBtn.style.transform = '';
+            }, 150);
+        });
+    });
+</script>
+{% endblock %} 

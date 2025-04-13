@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+
+{% block title %}Memory Card Game{% endblock %}
+
+{% block extra_css %}
+<style>
+    .game-container {
+        background: var(--card-background);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-lg);
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .memory-game-board {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin: 2rem auto;
+        max-width: 600px;
+    }
+
+    .memory-card {
+        aspect-ratio: 1;
+        background: var(--primary-color);
+        border-radius: 0.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: white;
+        transform-style: preserve-3d;
+        transition: transform 0.5s;
+    }
+
+    .memory-card.flipped {
+        transform: rotateY(180deg);
+        background: var(--card-background);
+        border: 2px solid var(--primary-color);
+    }
+
+    .memory-card.matched {
+        background: var(--success-color);
+        cursor: default;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 0.75rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: white;
+        background: linear-gradient(135deg, #4f46e5, #2563eb);
+        border: none;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2),
+                    0 1px 3px rgba(37, 99, 235, 0.1),
+                    inset 0 1px rgba(255, 255, 255, 0.1);
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #4338ca, #1d4ed8);
+        box-shadow: 0 6px 8px rgba(37, 99, 235, 0.3),
+                    0 2px 4px rgba(37, 99, 235, 0.2),
+                    inset 0 1px rgba(255, 255, 255, 0.2);
+    }
+
+    .btn:active {
+        transform: translateY(0);
+        background: linear-gradient(135deg, #3730a3, #1e40af);
+        box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2),
+                    0 1px 2px rgba(37, 99, 235, 0.1),
+                    inset 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .btn i {
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+    }
+
+    .btn:hover i {
+        transform: scale(1.1);
+    }
+
+    .controls {
+        margin-top: 2rem;
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    /* Dark mode specific styles */
+    :root[data-theme="dark"] .btn {
+        background: linear-gradient(135deg, #6366f1, #3b82f6);
+        box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3),
+                    0 1px 3px rgba(59, 130, 246, 0.2),
+                    inset 0 1px rgba(255, 255, 255, 0.1);
+    }
+
+    :root[data-theme="dark"] .btn:hover {
+        background: linear-gradient(135deg, #4f46e5, #2563eb);
+        box-shadow: 0 6px 8px rgba(59, 130, 246, 0.4),
+                    0 2px 4px rgba(59, 130, 246, 0.3),
+                    inset 0 1px rgba(255, 255, 255, 0.2);
+    }
+
+    :root[data-theme="dark"] .btn:active {
+        background: linear-gradient(135deg, #4338ca, #1d4ed8);
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3),
+                    0 1px 2px rgba(59, 130, 246, 0.2),
+                    inset 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    /* Button state styles */
+    .btn[data-state="playing"] {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    .btn[data-state="playing"]:hover {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+    }
+
+    .btn[data-state="playing"]:active {
+        background: linear-gradient(135deg, #b91c1c, #991b1b);
+    }
+
+    @media (max-width: 768px) {
+        .memory-game-board {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            max-width: 400px;
+        }
+
+        .memory-card {
+            font-size: 2rem;
+        }
+
+        .btn {
+            padding: 0.625rem 1.5rem;
+            font-size: 1rem;
+        }
+    }
+
+    .nav-button {
+        position: fixed;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: var(--card-background);
+        color: var(--text-primary);
+        border: 2px solid var(--primary-color);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        z-index: 1000;
+        opacity: 0.8;
+    }
+
+    .nav-button:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-50%) scale(1.1);
+        opacity: 1;
+    }
+
+    .nav-button.prev { left: 15px; }
+    .nav-button.next { right: 15px; }
+
+    @media (max-width: 768px) {
+        .nav-button {
+            width: 30px;
+            height: 30px;
+            font-size: 0.9rem;
+        }
+        .nav-button.prev { left: 8px; }
+        .nav-button.next { right: 8px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <a href="/circle-game" class="nav-button prev">
+        <i class="fas fa-chevron-left"></i>
+    </a>
+
+    <div class="game-container">
+        <h1>Memory Card Game</h1>
+        <p>Test your memory by matching pairs of cards!</p>
+        
+        <div class="memory-game-board" id="memoryGameBoard"></div>
+        
+        <div class="controls">
+            <button id="startGame" class="btn" data-state="initial">
+                <i class="fas fa-play"></i>
+                Start Game
+            </button>
+        </div>
+    </div>
+
+    <a href="/word-guess" class="nav-button next">
+        <i class="fas fa-chevron-right"></i>
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const memoryGameBoard = document.getElementById('memoryGameBoard');
+        const startGameBtn = document.getElementById('startGame');
+        
+        let cards = [];
+        let hasFlippedCard = false;
+        let lockBoard = false;
+        let firstCard, secondCard;
+
+        const emojis = ['🎮', '🎲', '🎯', '🎨', '🎭', '🎪', '🎫', '🎬'];
+        const cardValues = [...emojis, ...emojis];
+
+        function createBoard() {
+            memoryGameBoard.innerHTML = '';
+            const shuffledCards = shuffleArray(cardValues);
+            
+            shuffledCards.forEach((value, index) => {
+                const card = document.createElement('div');
+                card.classList.add('memory-card');
+                card.dataset.value = value;
+                card.dataset.index = index;
+                card.addEventListener('click', flipCard);
+                memoryGameBoard.appendChild(card);
+            });
+            
+            cards = document.querySelectorAll('.memory-card');
+        }
+
+        function shuffleArray(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function flipCard() {
+            if (lockBoard) return;
+            if (this === firstCard) return;
+            
+            this.classList.add('flipped');
+            this.textContent = this.dataset.value;
+            
+            if (!hasFlippedCard) {
+                hasFlippedCard = true;
+                firstCard = this;
+                return;
+            }
+            
+            secondCard = this;
+            checkForMatch();
+        }
+
+        function checkForMatch() {
+            const isMatch = firstCard.dataset.value === secondCard.dataset.value;
+            
+            if (isMatch) {
+                disableCards();
+                checkGameComplete();
+            } else {
+                unflipCards();
+            }
+        }
+
+        function disableCards() {
+            firstCard.classList.add('matched');
+            secondCard.classList.add('matched');
+            firstCard.removeEventListener('click', flipCard);
+            secondCard.removeEventListener('click', flipCard);
+            resetBoard();
+        }
+
+        function unflipCards() {
+            lockBoard = true;
+            setTimeout(() => {
+                firstCard.classList.remove('flipped');
+                secondCard.classList.remove('flipped');
+                firstCard.textContent = '';
+                secondCard.textContent = '';
+                resetBoard();
+            }, 1000);
+        }
+
+        function resetBoard() {
+            [hasFlippedCard, lockBoard] = [false, false];
+            [firstCard, secondCard] = [null, null];
+        }
+
+        function checkGameComplete() {
+            const matchedCards = document.querySelectorAll('.memory-card.matched');
+            if (matchedCards.length === cards.length) {
+                setTimeout(() => {
+                    alert('Congratulations! You completed the game!');
+                    startGameBtn.innerHTML = '<i class="fas fa-redo"></i> Play Again';
+                }, 500);
+            }
+        }
+
+        startGameBtn.addEventListener('click', function() {
+            if (cards.length > 0) {
+                resetGame();
+            }
+            createBoard();
+            this.innerHTML = '<i class="fas fa-redo"></i> Restart Game';
+            this.setAttribute('data-state', cards.length > 0 ? 'playing' : 'initial');
+        });
+
+        function resetGame() {
+            cards.forEach(card => {
+                card.classList.remove('flipped', 'matched');
+                card.textContent = '';
+                card.addEventListener('click', flipCard);
+            });
+            resetBoard();
+            startGameBtn.setAttribute('data-state', 'initial');
+        }
+    });
+</script>
+{% endblock %} 
