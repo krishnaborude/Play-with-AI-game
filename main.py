@@ -3,8 +3,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import create_engine, Column, String, inspect, DateTime, Integer, ForeignKey, Text, UniqueConstraint, Float
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker, relationship, declarative_base
 import os
 from dotenv import load_dotenv
 from passlib.context import CryptContext
@@ -22,6 +21,7 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv()
 
+# Create FastAPI app with proper event loop handling
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
 
@@ -66,6 +66,7 @@ except Exception as e:
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# Create declarative base
 Base = declarative_base()
 
 # User model
@@ -696,4 +697,4 @@ async def rps_game(request: Request, current_user: str = Depends(get_current_use
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000) 
+    uvicorn.run(app, host="0.0.0.0", port=8000) 
